@@ -28,6 +28,7 @@ from typing import Any
 import openpyxl
 import requests
 from dotenv import load_dotenv
+from urllib.parse import urlencode
 from supabase import create_client
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -326,10 +327,52 @@ def run_apify_actor(actor_input: dict, actor_id: str, token: str) -> tuple[list[
     return items, run_id
 
 
-def build_linkedin_actor_input(role: str, location: str, count: int) -> dict:
-    keywords = requests.utils.quote(role)
-    loc_encoded = requests.utils.quote(location)
-    url = f"https://www.linkedin.com/jobs/search/?keywords={keywords}&location={loc_encoded}&f_TPR=r86400"
+def build_valig_actor_input(
+    role: str,
+    location: str,
+    count: int,
+    date_posted: str = "r86400",
+    contract_types: list[str] | None = None,
+    experience_levels: list[str] | None = None,
+    company_names: list[str] | None = None,
+    company_ids: list[str] | None = None,
+) -> dict:
+    payload: dict = {"title": role, "location": location, "limit": count}
+    if date_posted:
+        payload["datePosted"] = date_posted
+    if contract_types:
+        payload["contractType"] = contract_types
+    if experience_levels:
+        payload["experienceLevel"] = experience_levels
+    if company_names:
+        payload["companyName"] = company_names
+    if company_ids:
+        payload["companyId"] = company_ids
+    return payload
+
+
+def build_linkedin_actor_input(
+    role: str,
+    location: str,
+    count: int,
+    date_posted: str = "r86400",
+    company_ids: list[str] | None = None,
+    contract_types: list[str] | None = None,
+    experience_levels: list[str] | None = None,
+    remote: str = "",
+) -> dict:
+    params: dict[str, str] = {"keywords": role, "location": location}
+    if date_posted:
+        params["f_TPR"] = date_posted
+    if company_ids:
+        params["f_C"] = ",".join(company_ids)
+    if contract_types:
+        params["f_JT"] = ",".join(contract_types)
+    if experience_levels:
+        params["f_E"] = ",".join(experience_levels)
+    if remote:
+        params["f_WT"] = remote
+    url = f"https://www.linkedin.com/jobs/search/?{urlencode(params)}"
     return {"urls": [url], "count": count}
 
 
@@ -355,15 +398,17 @@ def upload_xlsx_to_drive(jobs: list, folder_id: str, name_prefix: str) -> tuple[
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Jobs"
-    ws.append(["jobId", "jobDescription", "jobLink", "companyName", "Status"])
+    ws.append(["jobId", "title", "companyName", "url", "applyUrl", "skills_required", "jobDescription", "Status"])
 
     for job in jobs:
-        apply_url = job.raw.get("applyUrl") or job.url
         ws.append([
             job.job_id,
-            job.description,
-            apply_url,
+            job.title,
             job.company,
+            job.url,
+            job.raw.get("applyUrl") or job.url,
+            ", ".join(job.skills_required),
+            job.description,
             "",
         ])
 
@@ -415,7 +460,12 @@ def main() -> None:
     # Step 3 — deduplicate against Supabase by job_id
     print("\nFetching seen job IDs from Supabase …")
     seen_ids = fetch_seen_job_ids()
-    new_jobs = [job for job in cleaned if job.job_id not in seen_ids]
+    seen_in_batch: set[str] = set()
+    new_jobs = []
+    for job in cleaned:
+        if job.job_id not in seen_ids and job.job_id not in seen_in_batch:
+            new_jobs.append(job)
+            seen_in_batch.add(job.job_id)
     skipped = len(cleaned) - len(new_jobs)
     print(f"  ->{skipped} duplicate(s) removed, {len(new_jobs)} new job(s) remaining")
 
