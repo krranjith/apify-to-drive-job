@@ -24,6 +24,14 @@ from run_apify_to_drive import (
     run_apify_actor,
     upload_xlsx_to_drive,
 )
+from google_search_to_drive import (
+    DATE_MAP,
+    DEFAULT_QUERY,
+    PRESET_QUERIES,
+    get_serper_balance,
+    search_multiple_queries,
+    upload_csv_to_drive,
+)
 
 # ---------------------------------------------------------------------------
 # Actor registry — add new actors here
@@ -69,6 +77,14 @@ REMOTE_OPTIONS = {
     "On-site":   "1",
     "Remote":    "2",
     "Hybrid":    "3",
+}
+
+COUNTRY_OPTIONS = {
+    "United States": "us",
+    "Canada":        "ca",
+    "United Kingdom": "gb",
+    "India":         "in",
+    "Any (no restriction)": "",
 }
 
 # ---------------------------------------------------------------------------
@@ -132,6 +148,125 @@ def _render_dynamic_list(label: str, key: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 st.title("Apify → Google Drive")
+
+# Flow selector
+flow = st.radio(
+    "Flow",
+    options=["Apify Actor (LinkedIn)", "Google Advanced Search (Serper)"],
+    horizontal=True,
+)
+
+st.divider()
+
+if flow == "Google Advanced Search (Serper)":
+    # -----------------------------------------------------------------------
+    # Google Advanced Search (Serper) flow
+    # -----------------------------------------------------------------------
+    if st.button("Check Serper credits"):
+        try:
+            serper_key = os.environ.get("SERPER_API_KEY", "").strip()
+            if not serper_key:
+                st.error("SERPER_API_KEY not found in .env")
+            else:
+                st.info(f"Serper balance: {get_serper_balance(serper_key)} credits remaining")
+        except Exception as exc:
+            st.error(f"Error checking balance: {exc}")
+
+    selected_presets = st.multiselect(
+        "Queries",
+        options=list(PRESET_QUERIES.keys()),
+        default=[list(PRESET_QUERIES.keys())[0]],
+    )
+
+    if selected_presets:
+        with st.expander(f"Query text ({len(selected_presets)} selected)", expanded=False):
+            for label in selected_presets:
+                st.markdown(f"**{label}**")
+                st.code(PRESET_QUERIES[label], language=None)
+
+    add_custom = st.checkbox("Add a custom query")
+    custom_query = ""
+    if add_custom:
+        custom_query = st.text_area("Custom query", value=DEFAULT_QUERY, height=100)
+
+    col1, col2, col3 = st.columns(3)
+    date_label = col1.selectbox(
+        "Date posted",
+        ["Past hour", "Past 24 hours", "Past week", "Past month", "Past year"],
+        index=1,
+    )
+    num_results = col2.number_input("Max results per query", value=10, min_value=10, max_value=200, step=10)
+    country_label = col3.selectbox("Location", list(COUNTRY_OPTIONS.keys()), index=0)
+
+    date_key = {"Past hour": "h", "Past 24 hours": "d", "Past week": "w",
+                "Past month": "m", "Past year": "y"}[date_label]
+    gl_key = COUNTRY_OPTIONS[country_label]
+
+    st.divider()
+
+    if st.button("Run", type="primary", key="run_google_search"):
+        log_box = st.empty()
+        log_lines: list[str] = []
+
+        def log(msg: str) -> None:
+            log_lines.append(msg)
+            log_box.code("\n".join(log_lines), language=None)
+
+        queries: dict[str, str] = {label: PRESET_QUERIES[label] for label in selected_presets}
+        if add_custom and custom_query.strip():
+            queries["Custom"] = custom_query.strip()
+
+        if not queries:
+            st.warning("Select at least one preset query or add a custom one.")
+            st.stop()
+
+        try:
+            serper_key = os.environ.get("SERPER_API_KEY", "").strip()
+            if not serper_key:
+                st.error("SERPER_API_KEY not found in .env")
+                st.stop()
+
+            folder_id = os.environ.get("GOOGLE_DRIVE_ANALYSIS_FOLDER_ID", "").strip()
+
+            log(f"Running {len(queries)} quer{'y' if len(queries) == 1 else 'ies'} "
+                f"(range: {date_label}, max/query: {int(num_results)}, location: {country_label}) …")
+            for label in queries:
+                log(f"  - {label}")
+
+            results = search_multiple_queries(
+                queries, serper_key, num_results=int(num_results), date=date_key, gl=gl_key,
+                on_progress=log,
+            )
+            log(f"\nFetched {len(results)} combined result(s) after dedup.")
+
+            if not results:
+                st.warning("No results — try broadening the query or date range.")
+            else:
+                st.dataframe(results, use_container_width=True)
+
+                if len(queries) == 1:
+                    source_label = re.sub(r"[^a-z0-9]+", "_", next(iter(queries)).lower()).strip("_")
+                else:
+                    source_label = f"multi_{len(queries)}queries"
+
+                log(f"Uploading Google Sheet to Drive folder {folder_id} …")
+                file_id, file_name = upload_csv_to_drive(
+                    results, folder_id, source_label, as_google_sheet=True
+                )
+                log(f"Uploaded: {file_name}  (id={file_id})")
+
+                log("All steps complete.")
+                st.success("Run complete!")
+                st.metric("Results uploaded", len(results))
+
+        except Exception as exc:
+            st.error(f"Error: {exc}")
+
+    st.stop()
+
+# ---------------------------------------------------------------------------
+# Apify Actor flow
+# ---------------------------------------------------------------------------
 
 # Actor selector
 selected_actor_id = st.selectbox(
