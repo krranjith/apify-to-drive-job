@@ -7,3 +7,10 @@ google-auth
 google-auth-oauthlib
 google-api-python-client
 rich
+anthropic>=0.40
+requests>=2.31
+beautifulsoup4>=4.12
+openpyxl>=3.1
+reportlab>=4.0
+pdfplumber>=0.11
+python-docx>=1.1

@@ -12,6 +12,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / "evaluation"))
 load_dotenv(Path(__file__).parent / ".env")
 
 from run_apify_to_drive import (
@@ -32,6 +33,7 @@ from google_search_to_drive import (
     search_multiple_queries,
     upload_csv_to_drive,
 )
+import drive_pipeline
 
 # ---------------------------------------------------------------------------
 # Actor registry — add new actors here
@@ -152,11 +154,58 @@ st.title("Apify → Google Drive")
 # Flow selector
 flow = st.radio(
     "Flow",
-    options=["Apify Actor (LinkedIn)", "Google Advanced Search (Serper)"],
+    options=["Apify Actor (LinkedIn)", "Google Advanced Search (Serper)",
+             "Evaluation Pipeline (Job Match)"],
     horizontal=True,
 )
 
 st.divider()
+
+if flow == "Evaluation Pipeline (Job Match)":
+    # -----------------------------------------------------------------------
+    # Evaluation pipeline (score -> tailor -> build outputs), sourced from Drive
+    # -----------------------------------------------------------------------
+    mode = st.radio(
+        "Pipeline",
+        options=["Job pipeline (from latest Jobs file)",
+                 "Links pipeline (from latest Google Search file)"],
+    )
+
+    calibrate_on = st.checkbox("Calibrate only (score first N jobs, no tailoring/build/upload)")
+    calibrate_n = st.number_input("Calibrate count", value=4, min_value=1, max_value=50, step=1,
+                                   disabled=not calibrate_on)
+
+    st.divider()
+
+    if st.button("Run", type="primary", key="run_evaluation"):
+        log_box = st.empty()
+        log_lines: list[str] = []
+
+        def log(msg: str) -> None:
+            log_lines.append(msg)
+            log_box.code("\n".join(log_lines), language=None)
+
+        try:
+            calibrate = int(calibrate_n) if calibrate_on else None
+            if mode.startswith("Job pipeline"):
+                result = drive_pipeline.run_job_pipeline(calibrate=calibrate, on_progress=log)
+            else:
+                result = drive_pipeline.run_links_pipeline(calibrate=calibrate, on_progress=log)
+
+            log("All steps complete.")
+            st.success("Run complete!")
+
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Apply", result["counts"]["Apply"])
+            c2.metric("Review", result["counts"]["Review"])
+            c3.metric("Skip", result["counts"]["Skip"])
+            if not result["calibrated"]:
+                st.markdown(f"[Open results folder in Drive]({result['drive_folder_link']})")
+
+        except Exception as exc:
+            st.error(f"Error: {exc}")
+
+    st.stop()
 
 if flow == "Google Advanced Search (Serper)":
     # -----------------------------------------------------------------------

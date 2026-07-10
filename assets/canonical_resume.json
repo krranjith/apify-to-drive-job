@@ -1,0 +1,88 @@
+
+
+{
+  "name": "RANJITH KUMAR KUPPU RATHINAM",
+  "contact": [
+    ["linkedin.com/in/kr-rk", true],
+    ["github.com/krranjith", true],
+    ["krranjith1996@gmail.com", true],
+    ["San Jose, CA", false],
+    ["405-894-9694", false]
+  ],
+  "summary": "Data Scientist with 7+ years of experience at the intersection of Machine Learning, GenAI, and business strategy. Proven track record building production ML systems, pricing engines, forecasting pipelines, and RAG-based AI agents that drive measurable revenue impact at enterprise scale. Chat with my AI Twin ranjith.streamlit.app",
+  "skills": [
+    ["Machine Learning", "Causal Inference, XGBoost, K-Means, A/B Testing, Deep Learning, Forecasting, LightGBM, Random Forest, Decision Trees, Regressions, Reinforcement Learning"],
+    ["GenAI/ NLP", "RAG, LLMs, LangGraph, FastAPI, LlamaIndex, Prompt Engineering, Pinecone, Chroma DB, OCR, NLP, Claude"],
+    ["Programming & tools", "Python (Expert), SQL, R, PyTorch, Snowflake, dbt, cortex AI, Spark, Git, Docker, Streamlit, GCP, Databricks"],
+    ["Business Intelligence", "Power BI (Advanced DAX), Tableau, ETL, Price Optimization, Financial Analytics, Dataiku"],
+    ["Leadership", "President, Toastmasters International Club | Program Coordinator, Learning & Development at AMD"],
+    ["Awards", "Certified Analytics Professional (aCAP) | Won at OSU; IOWA; Humana Mays Competitions | Graduate Student Awardee"]
+  ],
+  "experience": [
+    {
+      "role": "Senior Business Planning Specialist (Data Scientist) | AMD Inc - San Jose, CA",
+      "date": "June 2023-Present",
+      "groups": [
+        {
+          "label": "Pricing & Forecasting Models (XGBoost, LightGBM, Causal Inference, K-Means, Snowflake, dbt)",
+          "bullets": [
+            "Developed end-to-end pricing recommendation engine for 17K SKUs across 9 markets (XGBoost quantile regression + K-Means segmentation, multi-layer guardrails), driving 45% quote auto-approval and 4x efficiency.",
+            "Built an AI Quote-to-POS forecasting pipeline (11M records, $43B portfolio) using LightGBM to cut forecast error by 45%",
+            "Engineered a causal inference framework that auto-flags margin-eroding deals for executive review driving strategic business."
+          ]
+        },
+        {
+          "label": "GenAI & RAG AI Agents (GPT, RAG, Text-to-SQL, LLMs, Snowflake, FastAPI, LangGraph)",
+          "bullets": [
+            "Architected a GPT + RAG screening tool detecting Grey Market diversion across 6,700+ customers; cutting research time by 85% & mitigating over $350M in revenue leakage.",
+            "Deployed a RAG based agent used by executives for 5-year long-range planning (LRP) using forecasting and model output data.",
+            "Deployed a NLP-to-SQL self-service agent, enabling execs to chat with finance data for AI insights & ad-hoc queries."
+          ]
+        },
+        {
+          "label": "ML Automation & Decision Tooling (Vectorized Python, Snowflake, Salesforce, PowerBI)",
+          "bullets": [
+            "Developed a model validation framework (vectorized Python) speeding model-delta detection by 5x and cutting 85% of QA",
+            "Owned pricing guidance tools that transform pricing model, cost, guardrails & business logic into pricing recommendations for Biz Ops, Sales and Finance teams; reducing TAT by 55% and efficiency gains of 6K+ manhours per month."
+          ]
+        }
+      ]
+    },
+    {
+      "role": "Research Assistant-Analytics | Edmon Low Library - Stillwater, OK",
+      "date": "Aug 2022-May 2023",
+      "groups": [
+        {
+          "label": "",
+          "bullets": [
+            "Implemented an NLP pipeline using Python, R & Regex to extract and map unstructured academic data with 90%+ accuracy, driving a 15% increase in directory traffic."
+          ]
+        }
+      ]
+    },
+    {
+      "role": "Associate Consultant (Data Science) | Infosys Ltd - Chennai, INDIA",
+      "date": "Jun 2017-May 2022",
+      "groups": [
+        {
+          "label": "",
+          "bullets": [
+            "Consulted on a multi-year Finance engagement, modelling millions of transactional records using Hadoop, Spark & MapReduce to deliver a global financial reporting insights system - reducing reporting cycle time by 20%.",
+            "Implemented Decision Tree classifiers to segment loan buckets in a non-retail loan system, improving distribution efficiency by 15%; reduced computation time by 40% via Apache Spark parallelization.",
+            "Designed key financial KPIs within customizable Tableau reports for executive stakeholders across transactional datasets, improving decision-making efficiency by 30%.",
+            "Supervised a Quality Assurance team of 3 & consistently maintained over 95% scenario coverage in UAT"
+          ]
+        }
+      ]
+    }
+  ],
+  "education": [
+    ["Master's in Business Analytics & Data Science | Oklahoma State University, USA", "GPA: 3.92 | May 2024"],
+    ["Bachelor of Engineering in Computer Science | SRM University, INDIA", "GPA: 8.6 (Distinction) | May 2017"]
+  ],
+  "projects": [
+    ["Interactive AI Career Twin", "Built a Role-Based RAG AI chatbot using Streamlit, LlamaIndex, LangChain, Pinecone (Vector Database) and OpenAI for natural language querying over professional datasets."],
+    ["AI Price Haggler", "Engineered an automated Agentic AI workflow to extract, clean, and analyze unstructured text from grocery receipts; developed a tracking system to monitor price fluctuations and inflation trends over time."],
+    ["Customer Segmentation & Revenue Map", "Developed a K-Means clustering model to analyze revenue/ consumption mix; identified targeted campaign strategies that drove a $30M+ revenue pipeline."]
+  ]
+}

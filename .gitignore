@@ -7,3 +7,6 @@ venv/
 *.egg-info/
 dist/
 build/
+evaluation/.cache/
+evaluation/runs/
+evaluation/archive/
