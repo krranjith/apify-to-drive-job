@@ -57,12 +57,10 @@ DATE_MAP = {
 }
 
 DEFAULT_QUERY = (
-    'inurl:careers inurl:job '
-    '("data scientist" OR "machine learning scientist" OR "applied scientist" '
-    'OR "pricing analyst" OR "business operations") '
-    '-"intern" -"internship" -"co-op" '
-    '-site:linkedin.com -site:indeed.com -site:glassdoor.com '
-    '-site:greenhouse.io -site:lever.co -site:myworkdayjobs.com'
+    '(site:greenhouse.io OR site:lever.co OR site:myworkdayjobs.com OR site:icims.com) '
+    '(intitle:"data scientist" OR intitle:business) '
+    '("United States" OR "USA" OR "Remote") '
+    '-intitle:intern -intitle:principal -intitle:director'
 )
 
 _ROLE_TITLES = (

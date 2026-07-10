@@ -146,6 +146,32 @@ def _render_dynamic_list(label: str, key: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Quick-copy profile info — for pasting into job application forms
+# ---------------------------------------------------------------------------
+
+PROFILE = {
+    "Full Name": "Ranjith Kumar Kuppu Rathinam",
+    "Email": "krranjith1996@gmail.com",
+    "Phone": "4058949694",
+    "LinkedIn": "https://www.linkedin.com/in/kr-rk/",
+    "GitHub": "https://github.com/krranjith",
+    "Portfolio": "https://ranjith.streamlit.app/",
+}
+
+
+def _render_profile_bar() -> None:
+    fields = list(PROFILE.items())
+    cols = st.columns(3)
+    for i, (label, value) in enumerate(fields):
+        with cols[i % 3]:
+            st.caption(label)
+            st.code(value, language=None)
+
+
+_render_profile_bar()
+st.divider()
+
+# ---------------------------------------------------------------------------
 # Layout
 # ---------------------------------------------------------------------------
 
